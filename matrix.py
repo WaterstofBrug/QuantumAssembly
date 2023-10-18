@@ -1,5 +1,4 @@
-import cmath
-from typing import List, Union
+from typing import List, Union, Type
 from icecream import ic
 
 
@@ -15,10 +14,10 @@ class Matrix:
         self.__height = len(matrix)
         self.__width = len(matrix[0])
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Matrix({self.Matrix}, {self.Height}, {self.Width})"
 
-    def __add__(self, other):
+    def __add__(self, other: 'Matrix') -> 'Matrix':
         # check if addition is possible
         if type(self) != type(other):
             raise Exception(f"Error: Invalid operation on types {type(self)} and {type(other)}.")
@@ -36,11 +35,11 @@ class Matrix:
 
         return Matrix(new_matrix)
 
-    def __iadd__(self, other):
+    def __iadd__(self, other: 'Matrix') -> None:
         res_matrix = self + other
         self.Matrix = res_matrix.Matrix
 
-    def __mul__(self, other):
+    def __mul__(self, other: Union['Matrix', int, float, complex]) -> 'Matrix':
         if isinstance(other, int) or isinstance(other, float) or isinstance(other, complex):
             return self.scalair_multiply(other)
 
@@ -60,14 +59,13 @@ class Matrix:
                 for i in range(other.Height):
                     matrix[row][col] += self.Matrix[row][i] * other.Matrix[i][col]
 
-        ic(inverse)
         return Matrix(matrix)
 
-    def __imul__(self, other):
+    def __imul__(self, other: Union['Matrix', int, float, complex]) -> None:
         res_matrix = self * other
         self.Matrix = res_matrix.Matrix
 
-    def __invert__(self):
+    def __invert__(self) -> 'Matrix':
         # note this is not a bitwise invert. This returns the inverse
         if not Matrix.is_square(self):
             raise Exception("Error: matrix not square")
@@ -83,21 +81,15 @@ class Matrix:
             matrix[i] = [factor * elem for elem in matrix[i]]
             inverse[i] = [factor * elem for elem in inverse[i]]
 
-            ic(matrix, inverse)
-
             for j in range(self.Height):
                 if j != i:
                     factor = matrix[j][i]
                     matrix[j] = [elem - factor * matrix[i][k] for k, elem in enumerate(matrix[j])]
                     inverse[j] = [elem - factor * inverse[i][k] for k, elem in enumerate(inverse[j])]
 
-        for row in range(self.Width):
-            for col in range (self.Height):
-                inverse[row][col] = round(inverse[row][col], 5)
-
         return Matrix(inverse)
 
-    def scalair_multiply(self, c: Union[int, float, complex]):
+    def scalair_multiply(self, c: Union[int, float, complex]) -> 'Matrix':
         res_matrix = Matrix(self.Matrix.copy())
 
         for row in range(res_matrix.Height):
@@ -118,9 +110,17 @@ class Matrix:
         # cheeky subtract
         return self + other.scalair_multiply(-1)
 
-    def __isub__(self, other):
+    def __isub__(self, other: 'Matrix') -> None:
         res_matrix = self - other
         self.Matrix = res_matrix.Matrix
+
+    def __round__(self, n: int = None) -> 'Matrix':
+        matrix = self.Matrix.copy()
+        for row in range(self.Width):
+            for col in range(self.Height):
+                matrix[row][col] = round(matrix[row][col], n)
+
+        return Matrix(matrix)
 
     @property
     def Matrix(self) -> List[List[Union[int, float, complex]]]:
@@ -143,7 +143,7 @@ class Matrix:
         self.__width = len(matrix[0])
 
     @staticmethod
-    def determinant(matrix) -> Union[int, float, complex]:
+    def determinant(matrix: 'Matrix') -> Union[int, float, complex]:
         if not isinstance(matrix, Matrix) or not Matrix.is_square(matrix):
             raise Exception("Error: not valid object for Determinant")
 
@@ -156,7 +156,7 @@ class Matrix:
                         range(matrix.Width)])
 
     @staticmethod
-    def slice_matrix(matrix, row: int, col: int):
+    def slice_matrix(matrix: 'Matrix', row: int, col: int) -> 'Matrix':
         sliced_matrix = matrix.Matrix.copy()
         sliced_matrix = sliced_matrix[0:row] + sliced_matrix[row + 1:]
 
@@ -166,7 +166,7 @@ class Matrix:
         return Matrix(sliced_matrix)
 
     @staticmethod
-    def is_square(matrix) -> bool:
+    def is_square(matrix: 'Matrix') -> bool:
         if not isinstance(matrix, Matrix):
             raise Exception("Error: type error must call is_square on Matrix.")
 

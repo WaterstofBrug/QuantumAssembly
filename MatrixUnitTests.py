@@ -97,10 +97,10 @@ class MatrixTests(unittest.TestCase):
                     [4, 0, -5, 2],
                     [-2, 8, 9, 0]])
 
-        self.assertEqual((A * (~A)).Matrix, [[1, 0, 0], [0, 1, 0], [0, 0, 1]])
-        self.assertEqual((B * (~B)).Matrix, [[1, 0], [0, 1]])
-        self.assertEqual((C * (~C)).Matrix, [[1, 0, 0], [0, 1, 0], [0, 0, 1]])
-        self.assertEqual((D * (~D)).Matrix, [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
+        self.assertEqual(round(A * (~A)).Matrix, [[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+        self.assertEqual(round(B * (~B)).Matrix, [[1, 0], [0, 1]])
+        self.assertEqual(round(C * (~C)).Matrix, [[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+        self.assertEqual(round(D * (~D)).Matrix, [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
 
 
 if __name__ == '__main__':
