@@ -60,11 +60,42 @@ class Matrix:
                 for i in range(other.Height):
                     matrix[row][col] += self.Matrix[row][i] * other.Matrix[i][col]
 
+        ic(inverse)
         return Matrix(matrix)
 
     def __imul__(self, other):
         res_matrix = self * other
         self.Matrix = res_matrix.Matrix
+
+    def __invert__(self):
+        # note this is not a bitwise invert. This returns the inverse
+        if not Matrix.is_square(self):
+            raise Exception("Error: matrix not square")
+        if not Matrix.determinant(self):
+            raise Exception("Error> invertible matrix")
+
+        matrix = self.Matrix.copy()
+
+        inverse = [[int(i == j) for j in range(self.Width)] for i in range(self.Height)]
+
+        for i, row in enumerate(matrix):
+            factor = 1 / row[i]
+            matrix[i] = [factor * elem for elem in matrix[i]]
+            inverse[i] = [factor * elem for elem in inverse[i]]
+
+            ic(matrix, inverse)
+
+            for j in range(self.Height):
+                if j != i:
+                    factor = matrix[j][i]
+                    matrix[j] = [elem - factor * matrix[i][k] for k, elem in enumerate(matrix[j])]
+                    inverse[j] = [elem - factor * inverse[i][k] for k, elem in enumerate(inverse[j])]
+
+        for row in range(self.Width):
+            for col in range (self.Height):
+                inverse[row][col] = round(inverse[row][col], 5)
+
+        return Matrix(inverse)
 
     def scalair_multiply(self, c: Union[int, float, complex]):
         res_matrix = Matrix(self.Matrix.copy())
@@ -110,6 +141,36 @@ class Matrix:
         self.__matrix = matrix
         self.__height = len(matrix)
         self.__width = len(matrix[0])
+
+    @staticmethod
+    def determinant(matrix) -> Union[int, float, complex]:
+        if not isinstance(matrix, Matrix) or not Matrix.is_square(matrix):
+            raise Exception("Error: not valid object for Determinant")
+
+        if matrix.Width == 1:
+            return matrix.Matrix[0][0]
+        elif matrix.Width == 2:
+            return matrix.Matrix[0][0] * matrix.Matrix[1][1] - matrix.Matrix[0][1] * matrix.Matrix[1][0]
+        else:
+            return sum([(-1) ** i * matrix.Matrix[0][i] * Matrix.determinant(Matrix.slice_matrix(matrix, 0, i)) for i in
+                        range(matrix.Width)])
+
+    @staticmethod
+    def slice_matrix(matrix, row: int, col: int):
+        sliced_matrix = matrix.Matrix.copy()
+        sliced_matrix = sliced_matrix[0:row] + sliced_matrix[row + 1:]
+
+        for i, row in enumerate(sliced_matrix):
+            sliced_matrix[i] = row[0:col] + row[col + 1:]
+
+        return Matrix(sliced_matrix)
+
+    @staticmethod
+    def is_square(matrix) -> bool:
+        if not isinstance(matrix, Matrix):
+            raise Exception("Error: type error must call is_square on Matrix.")
+
+        return matrix.Height == matrix.Width
 
     @staticmethod
     def is_valid(matrix: List[List[Union[int, float, complex]]]) -> bool:
